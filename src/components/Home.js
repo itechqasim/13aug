@@ -27,20 +27,12 @@ import {useLocation} from 'react-router-dom';
 import {useLocalStorage, useSessionStorage, useWindowSize} from 'react-use';
 
 const Actions = lazy(() => retry(() => import('./Actions')));
-const Footer = lazy(() => retry(() => import('./Footer')));
 const Level = lazy(() => retry(() => import('./Level')));
-const VaccinationHeader = lazy(() =>
-  retry(() => import('./VaccinationHeader'))
-);
 const MapExplorer = lazy(() => retry(() => import('./MapExplorer')));
 const MapSwitcher = lazy(() => retry(() => import('./MapSwitcher')));
-const Minigraphs = lazy(() => retry(() => import('./Minigraphs')));
 const Search = lazy(() => retry(() => import('./Search')));
 const StateHeader = lazy(() => retry(() => import('./StateHeader')));
 const Table = lazy(() => retry(() => import('./Table')));
-const TimeseriesExplorer = lazy(() =>
-  retry(() => import('./TimeseriesExplorer'))
-);
 
 function Home() {
   const [regionHighlighted, setRegionHighlighted] = useState({
@@ -189,20 +181,7 @@ function Home() {
               </Suspense>
             )}
 
-            <>
-              {!timeseries && <div style={{height: '123px'}} />}
-              {timeseries && (
-                <Suspense fallback={<div style={{height: '123px'}} />}>
-                  <Minigraphs
-                    timeseries={timeseries['TT']?.dates}
-                    {...{date}}
-                  />
-                </Suspense>
-              )}
-            </>
           </div>
-
-          {!hideVaccinated && <VaccinationHeader data={data['TT']} />}
 
           {data && (
             <Suspense fallback={<TableLoader />}>
@@ -264,35 +243,10 @@ function Home() {
                   </Suspense>
                 </div>
               )}
-
-              {timeseries && (
-                <Suspense fallback={<div style={{height: '50rem'}} />}>
-                  <TimeseriesExplorer
-                    stateCode="TT"
-                    {...{
-                      timeseries,
-                      date,
-                      regionHighlighted,
-                      setRegionHighlighted,
-                      anchor,
-                      setAnchor,
-                      expandTable,
-                      hideVaccinated,
-                      noRegionHighlightedDistrictData,
-                    }}
-                  />
-                </Suspense>
-              )}
             </>
           )}
         </div>
       </div>
-
-      {isVisible && (
-        <Suspense fallback={<div />}>
-          <Footer />
-        </Suspense>
-      )}
     </>
   );
 }
