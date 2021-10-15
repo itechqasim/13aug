@@ -19,7 +19,12 @@ module.exports = {
   plugins: ['react', 'prettier', 'react-hooks', 'import'],
   rules: {
     'require-jsdoc': 0,
-    'prettier/prettier': 'error',
+    'prettier/prettier': [
+      'error',
+      {
+        'endOfLine': 'auto',
+      }
+    ],
     'no-invalid-this': 0,
     'react/prop-types': 0,
     'react-hooks/rules-of-hooks': 'warn',

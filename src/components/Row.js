@@ -51,31 +51,6 @@ function Row({
 
   const rowElement = useRef();
 
-  const handleSortClick = useCallback(
-    (statistic) => {
-      if (sortData.sortColumn !== statistic) {
-        setSortData(
-          produce(sortData, (draftSortData) => {
-            if (
-              sortData.sortColumn === 'districtName' ||
-              statistic === 'districtName'
-            ) {
-              draftSortData.isAscending = !sortData.isAscending;
-            }
-            draftSortData.sortColumn = statistic;
-          })
-        );
-      } else {
-        setSortData(
-          produce(sortData, (draftSortData) => {
-            draftSortData.isAscending = !sortData.isAscending;
-          })
-        );
-      }
-    },
-    [sortData, setSortData]
-  );
-
   const sortingFunction = useCallback(
     (districtNameA, districtNameB) => {
       if (sortData.sortColumn !== 'districtName') {
@@ -243,10 +218,7 @@ function Row({
           </div>
 
           <div className={classnames('row', 'heading')}>
-            <div
-              className="cell heading"
-              onClick={handleSortClick.bind(this, 'districtName')}
-            >
+            <div className="cell heading">
               <div className="district-name">{t('District')}</div>
               {sortData.sortColumn === 'districtName' && (
                 <div className={'sort-icon'}>
@@ -263,7 +235,6 @@ function Row({
               <HeaderCell
                 key={statistic}
                 {...{statistic, sortData, setSortData}}
-                handleSort={handleSortClick.bind(this, statistic)}
               />
             ))}
           </div>

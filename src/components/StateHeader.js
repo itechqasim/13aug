@@ -52,14 +52,6 @@ function StateHeader({data, stateCode}) {
             {`${t('As of')} ${formatDate(data.meta.tested.date, 'dd MMMM')}`}
           </h5>
         )}
-        {data?.meta?.tested?.source && (
-          <h5>
-            {`${t('per')} `}
-            <a href={data.meta.tested.source} target="_noblank">
-              {t('source')}
-            </a>
-          </h5>
-        )}
       </div>
     </div>
   );
