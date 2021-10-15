@@ -51,6 +51,24 @@ export const STATISTIC_CONFIGS = {
     showDelta: true,
     hasPrimary: true,
   },
+  other: {
+    displayName: 'other',
+    format: 'long',
+    color: '#fd7e14',
+    showDelta: true,
+    tableConfig: {
+      notes: 'Migrated cases or non-COVID deaths',
+    },
+    hasPrimary: true,
+  },
+  tested: {
+    displayName: 'tested',
+    color: '#4b1eaa',
+    format: 'short',
+    showDelta: true,
+    hideZero: true,
+    category: 'tested',
+  },
   vaccinated1: {
     displayName: 'vaccinated (at least one dose)',
     color: '#fb5581',

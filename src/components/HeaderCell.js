@@ -15,55 +15,13 @@ function StateHeaderCell({handleSort, sortData, setSortData, statistic}) {
   const {t} = useTranslation();
   const wasLongPressed = useRef(false);
 
-  const onLongPress = () => {
-    if (sortData.sortColumn === statistic) {
-      wasLongPressed.current = true;
-      setSortData(
-        produce(sortData, (sortDataDraft) => {
-          sortDataDraft.delta = !sortData.delta;
-        })
-      );
-    }
-  };
-  const longPressEvent = useLongPress(onLongPress, {isPreventDefault: false});
-
-  const handleClick = useCallback(
-    (statistic) => {
-      if (wasLongPressed.current) {
-        wasLongPressed.current = false;
-      } else {
-        handleSort(statistic);
-      }
-    },
-    [handleSort]
-  );
-
   const statisticConfig = STATISTIC_CONFIGS[statistic];
 
   return (
     <div
       className={classnames('cell', 'heading')}
-      onClick={handleClick.bind(this, statistic)}
-      {...longPressEvent}
     >
-      {sortData.sortColumn === statistic && (
-        <div
-          className={classnames('sort-icon', {
-            [`is-${statistic}`]: sortData.delta,
-          })}
-        >
-          {sortData.isAscending ? (
-            <SortAscIcon size={12} />
-          ) : (
-            <SortDescIcon size={12} />
-          )}
-        </div>
-      )}
-      {statisticConfig?.tableConfig?.notes && (
-        <Tooltip message={t(statisticConfig.tableConfig.notes)}>
-          <InfoIcon size={14} />
-        </Tooltip>
-      )}
+
       <div>
         {t(
           toTitleCase(
@@ -76,12 +34,13 @@ function StateHeaderCell({handleSort, sortData, setSortData, statistic}) {
   );
 }
 
-const isStateHeaderCellEqual = (prevProps, currProps) => {
-  if (!equal(prevProps.sortData, currProps.sortData)) {
-    return false;
-  } else {
-    return true;
-  }
-};
+// const isStateHeaderCellEqual = (prevProps, currProps) => {
+//   if (!equal(prevProps.sortData, currProps.sortData)) {
+//     return false;
+//   } else {
+//     return true;
+//   }
+// };
 
-export default memo(StateHeaderCell, isStateHeaderCellEqual);
+export default memo(StateHeaderCell );
+// isStateHeaderCellEqual
