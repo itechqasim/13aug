@@ -1,5 +1,4 @@
 // import TableLoader from './loaders/Table';
-
 import {
   API_REFRESH_INTERVAL,
   DATA_API_ROOT,
@@ -22,15 +21,12 @@ import {
 import classnames from 'classnames';
 import {addDays, formatISO, max} from 'date-fns';
 import {useMemo, useRef, useState, lazy, Suspense} from 'react';
-import {Helmet} from 'react-helmet';
 import {useLocation} from 'react-router-dom';
 import {useLocalStorage, useSessionStorage, useWindowSize} from 'react-use';
 
-const Actions = lazy(() => retry(() => import('./Actions')));
 const Level = lazy(() => retry(() => import('./Level')));
 const MapExplorer = lazy(() => retry(() => import('./MapExplorer')));
 const MapSwitcher = lazy(() => retry(() => import('./MapSwitcher')));
-const Search = lazy(() => retry(() => import('./Search')));
 const StateHeader = lazy(() => retry(() => import('./StateHeader')));
 // const Table = lazy(() => retry(() => import('./Table')));
 
@@ -128,8 +124,10 @@ function Home() {
 
   return (
     <>
-  <div className="Home">
+      <div className="Home">
       <div className={classnames('home-left', {expanded: expandTable})}>
+
+
           <div style={{position: 'relative', marginTop: '1rem'}}>
             {data && (
               <Suspense fallback={<div style={{height: '50rem'}} />}>
