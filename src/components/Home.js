@@ -1,5 +1,4 @@
 // import TableLoader from './loaders/Table';
-
 import {
   API_REFRESH_INTERVAL,
   DATA_API_ROOT,
