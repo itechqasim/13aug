@@ -14,7 +14,7 @@ const App = () => {
       pageLink: '/',
       view: Home,
       displayName: 'Home',
-      showInNavbar: true,
+      // showInNavbar: true,
     }
   ];
 
