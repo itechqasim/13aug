@@ -1,5 +1,3 @@
-import MapLegend from './MapLegend';
-
 import {
   D3_TRANSITION_DURATION,
   MAP_DIMENSIONS,
@@ -689,9 +687,6 @@ function MapVisualizer({
           </div>
         )}
       </div>
-
-      {mapScale && <MapLegend {...{data, statistic, mapViz, mapScale}} />}
-
       <svg style={{position: 'absolute', height: 0}}>
         <defs>
           <filter id="balance-color" colorInterpolationFilters="sRGB">

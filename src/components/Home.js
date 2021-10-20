@@ -28,7 +28,6 @@ const Level = lazy(() => retry(() => import('./Level')));
 const MapExplorer = lazy(() => retry(() => import('./MapExplorer')));
 const MapSwitcher = lazy(() => retry(() => import('./MapSwitcher')));
 const StateHeader = lazy(() => retry(() => import('./StateHeader')));
-// const Table = lazy(() => retry(() => import('./Table')));
 
 function Home() {
   const [regionHighlighted, setRegionHighlighted] = useState({
@@ -37,14 +36,14 @@ function Home() {
   });
 
   const [anchor, setAnchor] = useLocalStorage('anchor', null);
-  const [expandTable, setExpandTable] = useLocalStorage('expandTable', false);
+  const [expandTable ] = useLocalStorage('expandTable', false);
   const [mapStatistic, setMapStatistic] = useSessionStorage(
     'mapStatistic',
     'active'
   );
   const [mapView, setMapView] = useLocalStorage('mapView', MAP_VIEWS.DISTRICTS);
 
-  const [date, setDate] = useState('');
+  const [date] = useState('');
   const location = useLocation();
 
   const {data} = useStickySWR(
@@ -85,15 +84,6 @@ function Home() {
       : null;
   }, [data]);
 
-  const lastUpdatedDate = useMemo(() => {
-    const updatedDates = Object.keys(data || {})
-      .map((stateCode) => data?.[stateCode]?.meta?.['last_updated'])
-      .filter((datetime) => datetime);
-    return updatedDates.length > 0
-      ? formatISO(max(updatedDates.map((datetime) => parseIndiaDate(datetime))))
-      : null;
-  }, [data]);
-
   const noDistrictDataStates = useMemo(
     () =>
       // Heuristic: All cases are in Unknown
@@ -125,9 +115,11 @@ function Home() {
   return (
     <>
       <div className="Home">
-      <div className={classnames('home-left', {expanded: expandTable})}>
-
-
+        <div
+          className={classnames('home-right', {expanded: expandTable})}
+          ref={homeRightElement}
+          style={{minHeight: '4rem'}}
+        >
           <div style={{position: 'relative', marginTop: '1rem'}}>
             {data && (
               <Suspense fallback={<div style={{height: '50rem'}} />}>
@@ -138,12 +130,7 @@ function Home() {
               </Suspense>
             )}
           </div>
-      </div>
-        <div
-          className={classnames('home-right', {expanded: expandTable})}
-          ref={homeRightElement}
-          style={{minHeight: '4rem'}}
-        >
+
           {(isVisible || location.hash) && (
             <>
               {data && (
@@ -155,7 +142,7 @@ function Home() {
                   })}
                 >
                   <Suspense fallback={<div style={{height: '50rem'}} />}>
-                    <StateHeader data={data['TT']} stateCode={'TT'} />
+                    <StateHeader data={data['TT']} />
                     <MapExplorer
                       {...{
                         stateCode: 'TT',
@@ -181,47 +168,9 @@ function Home() {
               )}
             </>
           )}
-        </div>
-        {/* <div className={classnames('home-left', {expanded: expandTable})}>
-          <div className="header">
-            {!data && !timeseries && <div style={{height: '60rem'}} />}
-          </div>
-          {/* <div className="header">
-            {!data && !timeseries && <div style={{height: '60rem'}} />}
-          </div> 
-          <div style={{position: 'relative', marginTop: '1rem'}}>
-            {data && (
-              <Suspense fallback={<div style={{height: '50rem'}} />}>
-                {width >= 769 && !expandTable && (
-                  <MapSwitcher {...{mapStatistic, setMapStatistic}} />
-                )}
-                <Level data={data['TT']} />
-              </Suspense>
-            )}
-          </div>
-          {data && (
-            <Suspense fallback={<TableLoader />}>
-              <Table
-                {...{
-                  data,
-                  regionHighlighted,
-                  setRegionHighlighted,
-                  expandTable,
-                  setExpandTable,
-                  hideDistrictData,
-                  hideDistrictTestData,
-                  hideVaccinated,
-                  lastDataDate,
-                  noDistrictDataStates,
-                }}
-              />
-            </Suspense>
-          )}
-        </div> */}
-      
+        </div>      
       </div>
     </>
   );
 }
-
 export default Home;
