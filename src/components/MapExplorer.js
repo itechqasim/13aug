@@ -1,8 +1,3 @@
-import MapVisualizerLoader from './loaders/MapVisualizer';
-import {Delta7Icon, PerLakhIcon} from './snippets/Icons';
-import StatisticDropdown from './StatisticDropdown';
-import Tooltip from './Tooltip';
-
 import {
   MAP_META,
   MAP_TYPES,
@@ -14,13 +9,10 @@ import {
   STATISTIC_CONFIGS,
   UNKNOWN_DISTRICT_KEY,
 } from '../constants';
-import {formatNumber, getStatistic, retry} from '../utils/commonFunctions';
 
+import {formatNumber, getStatistic, retry} from '../utils/commonFunctions';
 import {
-  ArrowLeftIcon,
-  DotFillIcon,
-  PinIcon,
-  OrganizationIcon,
+  DotFillIcon
 } from '@primer/octicons-react';
 import classnames from 'classnames';
 import equal from 'fast-deep-equal';
@@ -94,26 +86,6 @@ function MapExplorer({
         STATE_NAMES[regionHighlighted.stateCode];
     });
   }, [data, regionHighlighted.stateCode, regionHighlighted.districtName]);
-
-  const handlePerLakhClick = useCallback(() => {
-    const statisticConfig = STATISTIC_CONFIGS[mapStatistic];
-    if (statisticConfig?.nonLinear || mapStatistic === 'population') {
-      return;
-    }
-    setIsPerLakh((isPerLakh) => !isPerLakh);
-  }, [mapStatistic, setIsPerLakh]);
-
-  const handleDistrictClick = useCallback(() => {
-    const newMapView =
-      mapView === MAP_VIEWS.DISTRICTS ? MAP_VIEWS.STATES : MAP_VIEWS.DISTRICTS;
-    if (newMapView === MAP_VIEWS.STATES) {
-      setRegionHighlighted({
-        stateCode: regionHighlighted.stateCode,
-        districtName: null,
-      });
-    }
-    setMapView(newMapView);
-  }, [mapView, regionHighlighted.stateCode, setMapView, setRegionHighlighted]);
 
   const history = useHistory();
   const panelRef = useRef();
@@ -201,12 +173,6 @@ function MapExplorer({
     ? MAP_VIZS.CHOROPLETH
     : MAP_VIZS.BUBBLE;
 
-  const handleDeltaClick = useCallback(() => {
-    if (statisticConfig?.showDelta) {
-      setDelta7Mode((delta7Mode) => !delta7Mode);
-    }
-  }, [statisticConfig, setDelta7Mode]);
-
   const stickied = anchor === 'mapexplorer' || (expandTable && width >= 769);
 
   const transformStatistic = useCallback(
@@ -224,28 +190,9 @@ function MapExplorer({
   return (
     <div
       className={classnames(
-        'MapExplorer',
-        {stickied},
-        {
-          hidden:
-            anchor && anchor !== 'mapexplorer' && (!expandTable || width < 769),
-        }
+        'MapExplorer'
       )}
     >
-      <div
-        className={classnames('anchor', 'fadeInUp', {
-          stickied,
-        })}
-        style={{
-          display: width < 769 || (width >= 769 && expandTable) ? 'none' : '',
-        }}
-        onClick={
-          setAnchor &&
-          setAnchor.bind(this, anchor === 'mapexplorer' ? null : 'mapexplorer')
-        }
-      >
-        <PinIcon />
-      </div>
       <div className="panel" ref={panelRef}>
         <div className="panel-left fadeInUp" style={trail[0]}>
           <h2
@@ -270,74 +217,12 @@ function MapExplorer({
                     : '-'
                 )}
               </animated.div>
-              <StatisticDropdown
-                currentStatistic={mapStatistic}
-                statistics={mapStatistics}
-                mapType={mapMeta.mapType}
-                {...{
-                  isPerLakh,
-                  delta7Mode,
-                  mapStatistic,
-                  setMapStatistic,
-                  hideDistrictTestData,
-                  hideVaccinated,
-                  zoneColor,
-                }}
-              />
             </h1>
           )}
         </div>
 
         <div className={classnames('panel-right', `is-${mapStatistic}`)}>
           <div className="switch-type">
-            <Tooltip message={'Last 7 day values'} hold>
-              <div
-                className={classnames('toggle', 'fadeInUp', {
-                  'is-highlighted':
-                    (delta7Mode && statisticConfig?.showDelta) ||
-                    statisticConfig?.onlyDelta7,
-                  disabled: !statisticConfig?.showDelta,
-                })}
-                onClick={handleDeltaClick}
-                style={trail[1]}
-              >
-                <Delta7Icon />
-              </div>
-            </Tooltip>
-
-            <Tooltip message={'Per lakh people'} hold>
-              <div
-                className={classnames('toggle', 'fadeInUp', {
-                  'is-highlighted':
-                    !statisticConfig?.nonLinear &&
-                    mapViz === MAP_VIZS.CHOROPLETH,
-                  disabled:
-                    statisticConfig?.nonLinear || mapStatistic === 'population',
-                })}
-                onClick={handlePerLakhClick}
-                style={trail[2]}
-              >
-                <PerLakhIcon />
-              </div>
-            </Tooltip>
-
-            {mapMeta.mapType === MAP_TYPES.COUNTRY && (
-              <Tooltip message={'Toggle between states/districts'} hold>
-                <div
-                  className={classnames('toggle', 'boundary fadeInUp', {
-                    'is-highlighted': isDistrictView,
-                    disabled:
-                      hideDistrictData ||
-                      (statisticConfig?.category === 'tested' &&
-                        hideDistrictTestData),
-                  })}
-                  onClick={handleDistrictClick}
-                  style={trail[3]}
-                >
-                  <OrganizationIcon />
-                </div>
-              </Tooltip>
-            )}
 
             {mapMeta.mapType === MAP_TYPES.STATE && (
               <>
@@ -349,7 +234,6 @@ function MapExplorer({
                   }}
                   style={trail[4]}
                 >
-                  <ArrowLeftIcon />
                 </div>
               </>
             )}
@@ -383,17 +267,7 @@ function MapExplorer({
         {...swipeHandlers}
       >
         {mapStatistic && (
-          <Suspense
-            fallback={
-              <MapVisualizerLoader
-                className="map-loader"
-                {...{
-                  width: mapExplorerRef.current?.clientWidth,
-                  statistic: mapStatistic,
-                }}
-              />
-            }
-          >
+          <Suspense>
             <MapVisualizer
               data={mapData}
               statistic={mapStatistic}

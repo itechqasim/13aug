@@ -1,23 +1,20 @@
-import './App.scss';
+import './App.css';
+
 import {retry} from './utils/commonFunctions';
 
-import {lazy, useState, Suspense, useEffect} from 'react';
+import {lazy,Suspense} from 'react';
 import {Route, Redirect, Switch, useLocation} from 'react-router-dom';
-
 const Home = lazy(() => retry(() => import('./components/Home')));
-
 const App = () => {
   const location = useLocation();
-
   const pages = [
     {
       pageLink: '/',
       view: Home,
       displayName: 'Home',
-      showInNavbar: true,
+      showInNavbar: true
     }
   ];
-
   return (
     <div className="App">
       <Suspense fallback={<div />}>
@@ -38,5 +35,4 @@ const App = () => {
     </div>
   );
 };
-
 export default App;
