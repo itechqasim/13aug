@@ -51,7 +51,6 @@ function MapExplorer({
   hideDistrictData = false,
   hideDistrictTestData = true,
   hideVaccinated = false,
-  noDistrictData = false,
 }) {
   const {t} = useTranslation();
   const mapExplorerRef = useRef();
@@ -221,43 +220,7 @@ function MapExplorer({
           )}
         </div>
 
-        <div className={classnames('panel-right', `is-${mapStatistic}`)}>
-          <div className="switch-type">
 
-            {mapMeta.mapType === MAP_TYPES.STATE && (
-              <>
-                <div className="divider" />
-                <div
-                  className="toggle back fadeInUp"
-                  onClick={() => {
-                    history.push('/#MapExplorer');
-                  }}
-                  style={trail[4]}
-                >
-                </div>
-              </>
-            )}
-          </div>
-
-          <div className="switch-statistic fadeInUp" style={trail[5]}>
-            {mapStatistics.map((statistic) => (
-              <div
-                key={statistic}
-                className={classnames(
-                  'toggle',
-                  'statistic-option',
-                  `is-${statistic}`,
-                  {
-                    'is-highlighted': mapStatistic === statistic,
-                  }
-                )}
-                onClick={setMapStatistic.bind(this, statistic)}
-              >
-                <DotFillIcon />
-              </div>
-            ))}
-          </div>
-        </div>
       </div>
 
       <div
@@ -279,7 +242,6 @@ function MapExplorer({
                 setRegionHighlighted,
                 getMapStatistic,
                 transformStatistic,
-                noDistrictData,
               }}
             ></MapVisualizer>
           </Suspense>
@@ -327,8 +289,6 @@ const isEqual = (prevProps, currProps) => {
       currProps.noRegionHighlightedDistrictData
     )
   ) {
-    return false;
-  } else if (!equal(prevProps.noDistrictData, currProps.noDistrictData)) {
     return false;
   }
   return true;

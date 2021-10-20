@@ -22,9 +22,6 @@ import {
   interpolateBlues,
   interpolateGreens,
   interpolateGreys,
-  interpolatePurples,
-  interpolateOranges,
-  interpolatePiYG,
 } from 'd3-scale-chromatic';
 import {select} from 'd3-selection';
 import {transition} from 'd3-transition';
@@ -43,19 +40,7 @@ const colorInterpolator = (statistic) => {
     return (t) => interpolateGreens(t * 0.85);
   } else if (statistic === 'deceased') {
     return (t) => interpolateGreys(t * 0.85);
-  } else if (statistic === 'tested') {
-    return (t) => interpolatePurples(t * 0.85);
-  } else if (
-    statistic === 'tpr' ||
-    statistic === 'cfr' ||
-    statistic === 'other'
-  ) {
-    return (t) => interpolateOranges(t * 0.85);
-  } else if (STATISTIC_CONFIGS[statistic]?.category === 'vaccinated') {
-    return (t) => interpolatePiYG(0.15 + 0.35 * (1 - t));
-  } else {
-    return (t) => interpolateOranges(t * 0.85);
-  }
+  }  
 };
 
 function MapVisualizer({
@@ -68,9 +53,7 @@ function MapVisualizer({
   statistic,
   getMapStatistic,
   transformStatistic,
-  noDistrictData,
 }) {
-  const {t} = useTranslation();
   const svgRef = useRef(null);
 
   const mapMeta = MAP_META[mapCode];
@@ -190,22 +173,6 @@ function MapVisualizer({
     }
   }, [mapViz, statistic, statisticMax]);
 
-  const fillColor = useCallback(
-    (d) => {
-      if (mapViz === MAP_VIZS.CHOROPLETH) {
-        const stateCode = STATE_CODES[d.properties.st_nm];
-        const district = d.properties.district;
-        const stateData = data[stateCode];
-        const districtData = stateData?.districts?.[district];
-        const n = transformStatistic(
-          getMapStatistic(district ? districtData : stateData)
-        );
-        const color = n ? mapScale(n) : '#ffffff00';
-        return color;
-      }
-    },
-    [mapViz, data, mapScale, getMapStatistic, transformStatistic]
-  );
 
   const populateTexts = useCallback(
     (regionSelection) => {
@@ -250,87 +217,6 @@ function MapVisualizer({
     return geoPath(geoIdentity());
   }, [geoData]);
 
-  // Choropleth
-  useEffect(() => {
-    if (!geoData) return;
-    const svg = select(svgRef.current);
-    const T = transition().duration(D3_TRANSITION_DURATION);
-
-    svg
-      .select('.regions')
-      .selectAll('path')
-      .data(mapViz === MAP_VIZS.CHOROPLETH ? features : [], (d) => d.id)
-      .join(
-        (enter) =>
-          enter
-            .append('path')
-            .attr('d', path)
-            .attr('stroke-width', 1.8)
-            .attr('stroke-opacity', 0)
-            .style('cursor', 'pointer')
-            .on('mouseenter', (event, d) => {
-              if (onceTouchedRegion.current) return;
-              setRegionHighlighted({
-                stateCode: STATE_CODES[d.properties.st_nm],
-                districtName: d.properties.district,
-              });
-            })
-            .on('pointerdown', (event, d) => {
-              if (onceTouchedRegion.current === d)
-                onceTouchedRegion.current = null;
-              else onceTouchedRegion.current = d;
-              setRegionHighlighted({
-                stateCode: STATE_CODES[d.properties.st_nm],
-                districtName: d.properties.district,
-              });
-            })
-            .attr('fill', '#fff0')
-            .attr('stroke', '#fff0'),
-        (update) => update,
-        (exit) =>
-          exit
-            .transition(T)
-            .attr('stroke', '#fff0')
-            .attr('fill', '#fff0')
-            .remove()
-      )
-      .attr('pointer-events', 'all')
-      .on('click', (event, d) => {
-        event.stopPropagation();
-        const stateCode = STATE_CODES[d.properties.st_nm];
-        if (
-          onceTouchedRegion.current ||
-          mapMeta.mapType === MAP_TYPES.STATE ||
-          !data[stateCode]?.districts
-        )
-          return;
-        // Disable pointer events till the new map is rendered
-        svg.attr('pointer-events', 'none');
-        svg.select('.regions').selectAll('path').attr('pointer-events', 'none');
-        // Switch map
-        history.push(
-          `/state/${stateCode}${window.innerWidth < 769 ? '#MapExplorer' : ''}`
-        );
-      })
-      .call((sel) => {
-        sel
-          .transition(T)
-          .attr('fill', fillColor)
-          .attr('stroke', strokeColor.bind(this, ''));
-      });
-  }, [
-    mapViz,
-    data,
-    features,
-    fillColor,
-    geoData,
-    history,
-    mapMeta.mapType,
-    path,
-    setRegionHighlighted,
-    strokeColor,
-  ]);
-
   const sortedFeatures = useMemo(() => {
     if (mapViz === MAP_VIZS.CHOROPLETH) {
       return [];
@@ -360,7 +246,7 @@ function MapVisualizer({
     }
   }, [mapViz, isDistrictView, getMapStatistic, features, data]);
 
-  // Bubble
+  // Bubbles denoting the no of cases/etc
   useEffect(() => {
     const svg = select(svgRef.current);
     const T = transition().duration(D3_TRANSITION_DURATION);
@@ -409,16 +295,6 @@ function MapVisualizer({
             : feature.properties.district || UNKNOWN_DISTRICT_KEY,
         });
       })
-      .on('click', (event, feature) => {
-        event.stopPropagation();
-        if (onceTouchedRegion.current || mapMeta.mapType === MAP_TYPES.STATE)
-          return;
-        history.push(
-          `/state/${STATE_CODES[feature.properties.st_nm]}${
-            window.innerWidth < 769 ? '#MapExplorer' : ''
-          }`
-        );
-      })
       .call((sel) => {
         sel
           .transition(T)
@@ -444,98 +320,7 @@ function MapVisualizer({
     getMapStatistic,
   ]);
 
-  // Spike (Note: bad unmodular code)
-  useEffect(() => {
-    const svg = select(svgRef.current);
-    const T = transition().duration(D3_TRANSITION_DURATION);
-
-    const regionSelection = svg
-      .select('.spikes')
-      .selectAll('path')
-      .data(
-        mapViz === MAP_VIZS.SPIKE ? sortedFeatures : [],
-        (feature) => feature.id,
-        (feature) => feature.id
-      )
-      .join(
-        (enter) =>
-          enter
-            .append('path')
-            .attr(
-              'transform',
-              (feature) => `translate(${path.centroid(feature)})`
-            )
-            .attr('opacity', 0)
-            .attr('fill-opacity', 0.25)
-            .style('cursor', 'pointer')
-            .attr('pointer-events', 'all')
-            .attr('d', spike(0))
-            .call((enter) => {
-              enter.append('title');
-            }),
-        (update) => update,
-        (exit) =>
-          exit.call((exit) =>
-            exit.transition(T).attr('opacity', 0).attr('d', spike(0)).remove()
-          )
-      )
-      .on('mouseenter', (event, feature) => {
-        if (onceTouchedRegion.current) return;
-        setRegionHighlighted({
-          stateCode: STATE_CODES[feature.properties.st_nm],
-          districtName: !isDistrictView
-            ? null
-            : feature.properties.district || UNKNOWN_DISTRICT_KEY,
-        });
-      })
-      .on('pointerdown', (event, feature) => {
-        if (onceTouchedRegion.current === feature)
-          onceTouchedRegion.current = null;
-        else onceTouchedRegion.current = feature;
-        setRegionHighlighted({
-          stateCode: STATE_CODES[feature.properties.st_nm],
-          districtName: !isDistrictView
-            ? null
-            : feature.properties.district || UNKNOWN_DISTRICT_KEY,
-        });
-      })
-      .on('click', (event, feature) => {
-        event.stopPropagation();
-        if (onceTouchedRegion.current || mapMeta.mapType === MAP_TYPES.STATE)
-          return;
-        history.push(
-          `/state/${STATE_CODES[feature.properties.st_nm]}${
-            window.innerWidth < 769 ? '#MapExplorer' : ''
-          }`
-        );
-      })
-      .call((sel) => {
-        sel
-          .transition(T)
-          .attr('opacity', 1)
-          .attr('fill', statisticConfig.color + '70')
-          .attr('stroke', statisticConfig.color + '70')
-          .attr('d', (feature) => spike(mapScale(feature.value)));
-      });
-
-    window.requestIdleCallback(() => {
-      populateTexts(regionSelection);
-    });
-  }, [
-    mapMeta.mapType,
-    mapViz,
-    isDistrictView,
-    sortedFeatures,
-    history,
-    mapScale,
-    path,
-    setRegionHighlighted,
-    populateTexts,
-    statisticConfig,
-    getMapStatistic,
-  ]);
-
-  // Boundaries
+  // Boundaries of the map 
   useEffect(() => {
     if (!geoData) return;
     const svg = select(svgRef.current);
@@ -549,14 +334,6 @@ function MapVisualizer({
       meshStates[0].id = `${mapCode}-states`;
     }
 
-    if (
-      mapMeta.mapType === MAP_TYPES.STATE ||
-      (isDistrictView && mapViz === MAP_VIZS.CHOROPLETH)
-    ) {
-      // Add id to mesh
-      meshDistricts = [mesh(geoData, geoData.objects.districts)];
-      meshDistricts[0].id = `${mapCode}-districts`;
-    }
 
     svg
       .select('.state-borders')
@@ -601,65 +378,6 @@ function MapVisualizer({
     strokeColor,
   ]);
 
-  // Highlight
-  useEffect(() => {
-    const stateCode = regionHighlighted.stateCode;
-    const stateName = STATE_NAMES[stateCode];
-    const district = regionHighlighted.districtName;
-
-    const svg = select(svgRef.current);
-
-    if (mapViz === MAP_VIZS.BUBBLE) {
-      svg
-        .select('.circles')
-        .selectAll('circle')
-        .attr('fill-opacity', (d) => {
-          const highlighted =
-            stateName === d.properties.st_nm &&
-            ((!district && stateCode !== mapCode) ||
-              district === d.properties?.district ||
-              !isDistrictView ||
-              (district === UNKNOWN_DISTRICT_KEY && !d.properties.district));
-          return highlighted ? 1 : 0.25;
-        });
-    } else if (mapViz === MAP_VIZS.SPIKE) {
-      svg
-        .select('.spikes')
-        .selectAll('path')
-        .attr('fill-opacity', (d) => {
-          const highlighted =
-            stateName === d.properties.st_nm &&
-            ((!district && stateCode !== mapCode) ||
-              district === d.properties?.district ||
-              !isDistrictView ||
-              (district === UNKNOWN_DISTRICT_KEY && !d.properties.district));
-          return highlighted ? 1 : 0.25;
-        });
-    } else {
-      svg
-        .select('.regions')
-        .selectAll('path')
-        .each(function (d) {
-          const highlighted =
-            stateName === d.properties.st_nm &&
-            ((!district && stateCode !== mapCode) ||
-              district === d.properties?.district ||
-              !isDistrictView);
-          if (highlighted) this.parentNode.appendChild(this);
-          select(this).attr('stroke-opacity', highlighted ? 1 : 0);
-        });
-    }
-  }, [
-    geoData,
-    data,
-    mapCode,
-    isDistrictView,
-    mapViz,
-    regionHighlighted.stateCode,
-    regionHighlighted.districtName,
-    statistic,
-  ]);
-
   return (
     <>
       <div className="svg-parent">
@@ -676,16 +394,7 @@ function MapVisualizer({
           <g className="state-borders" />
           <g className="district-borders" />
           <g className="circles" />
-          <g className="spikes" />
         </svg>
-        {noDistrictData && statisticConfig?.hasPrimary && (
-          <div className={classnames('disclaimer', `is-${statistic}`)}>
-            <AlertIcon />
-            <span>
-              {t('District-wise data not available in state bulletin')}
-            </span>
-          </div>
-        )}
       </div>
       <svg style={{position: 'absolute', height: 0}}>
         <defs>
