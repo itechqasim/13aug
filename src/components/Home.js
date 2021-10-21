@@ -138,10 +138,7 @@ function Home() {
                         mapView,
                         regionHighlighted,
                         setRegionHighlighted,
-                        anchor,
-                        setAnchor,
                         lastDataDate,
-                        hideDistrictTestData,
                         noRegionHighlightedDistrictData,
                       }}
                     />

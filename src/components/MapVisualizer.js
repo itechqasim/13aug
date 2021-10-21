@@ -5,50 +5,29 @@ import {
   MAP_TYPES,
   MAP_VIZS,
   STATE_CODES,
-  STATE_NAMES,
   STATISTIC_CONFIGS,
   UNKNOWN_DISTRICT_KEY,
 } from '../constants';
-import {formatNumber, spike, toTitleCase} from '../utils/commonFunctions';
 
-import {AlertIcon} from '@primer/octicons-react';
 import classnames from 'classnames';
 import {max} from 'd3-array';
 import {json} from 'd3-fetch';
 import {geoIdentity, geoPath} from 'd3-geo';
 import {scaleLinear, scaleSqrt, scaleSequential} from 'd3-scale';
-import {
-  interpolateReds,
-  interpolateBlues,
-  interpolateGreens,
-  interpolateGreys,
-} from 'd3-scale-chromatic';
+
 import {select} from 'd3-selection';
 import {transition} from 'd3-transition';
 import {useCallback, useEffect, useMemo, useRef} from 'react';
-import {useTranslation} from 'react-i18next';
 import {useHistory} from 'react-router-dom';
 import useSWR from 'swr';
 import {feature, mesh} from 'topojson-client';
 
-const colorInterpolator = (statistic) => {
-  if (statistic === 'confirmed') {
-    return (t) => interpolateReds(t * 0.85);
-  } else if (statistic === 'active') {
-    return (t) => interpolateBlues(t * 0.85);
-  } else if (statistic === 'recovered') {
-    return (t) => interpolateGreens(t * 0.85);
-  } else if (statistic === 'deceased') {
-    return (t) => interpolateGreys(t * 0.85);
-  }  
-};
 
 function MapVisualizer({
   mapCode,
   isDistrictView,
   mapViz,
   data,
-  regionHighlighted,
   setRegionHighlighted,
   statistic,
   getMapStatistic,
@@ -66,10 +45,6 @@ function MapVisualizer({
     },
     {suspense: false, revalidateOnFocus: false}
   );
-
-  const statisticTotal = useMemo(() => {
-    return getMapStatistic(data[mapCode]);
-  }, [data, mapCode, getMapStatistic]);
 
   const statisticConfig = STATISTIC_CONFIGS[statistic];
 
@@ -161,30 +136,6 @@ function MapVisualizer({
     }
   }, [mapViz, statistic, statisticMax]);
 
-
-  const populateTexts = useCallback(
-    (regionSelection) => {
-      regionSelection.select('title').text((d) => {
-        if (mapViz !== MAP_VIZS.CHOROPLETH && !statisticConfig?.nonLinear) {
-          const state = d.properties.st_nm;
-          const stateCode = STATE_CODES[state];
-          const district = d.properties.district;
-
-          const stateData = data[stateCode];
-          const districtData = stateData?.districts?.[district];
-          let n;
-          if (district) n = getMapStatistic(districtData);
-          else n = getMapStatistic(stateData);
-          return `${formatNumber(
-            100 * (n / (statisticTotal || 0.001)),
-            '%'
-          )} from ${toTitleCase(district ? district : state)}`;
-        }
-      });
-    },
-    [mapViz, data, getMapStatistic, statisticTotal, statisticConfig]
-  );
-
   const onceTouchedRegion = useRef(null);
 
   // Reset on tapping outside map
@@ -273,7 +224,7 @@ function MapVisualizer({
             : feature.properties.district || UNKNOWN_DISTRICT_KEY,
         });
       })
-      .on('pointerdown', (event, feature) => {
+      .on('pointerdown', (feature) => {
         if (onceTouchedRegion.current === feature)
           onceTouchedRegion.current = null;
         else onceTouchedRegion.current = feature;
@@ -291,10 +242,6 @@ function MapVisualizer({
           .attr('stroke', statisticConfig.color + '70')
           .attr('r', (feature) => mapScale(feature.value));
       });
-
-    window.requestIdleCallback(() => {
-      populateTexts(regionSelection);
-    });
   }, [
     mapMeta.mapType,
     mapViz,
@@ -304,7 +251,6 @@ function MapVisualizer({
     mapScale,
     path,
     setRegionHighlighted,
-    populateTexts,
     statisticConfig,
     getMapStatistic,
   ]);
@@ -341,7 +287,6 @@ function MapVisualizer({
     mapMeta,
     mapCode,
     mapViz,
-    isDistrictView,
     statistic,
     path,
     strokeColor,
@@ -361,7 +306,6 @@ function MapVisualizer({
         >
           <g className="regions" />
           <g className="state-borders" />
-          <g className="district-borders" />
           <g className="circles" />
         </svg>
       </div>

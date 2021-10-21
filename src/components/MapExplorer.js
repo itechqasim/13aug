@@ -41,13 +41,7 @@ function MapExplorer({
   regionHighlighted,
   setRegionHighlighted,
   noRegionHighlightedDistrictData,
-  anchor,
-  setAnchor,
-  expandTable = false,
   lastDataDate,
-  hideDistrictData = true,
-  hideDistrictTestData = true,
-  hideVaccinated = false,
 }) {
   const {t} = useTranslation();
   const mapExplorerRef = useRef();
@@ -206,7 +200,6 @@ function MapExplorer({
                 mapCode,
                 isDistrictView,
                 mapViz,
-                regionHighlighted,
                 setRegionHighlighted,
                 getMapStatistic,
                 transformStatistic,

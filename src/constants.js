@@ -50,119 +50,7 @@ export const STATISTIC_CONFIGS = {
     format: 'long',
     showDelta: true,
     hasPrimary: true,
-  },
-  other: {
-    displayName: 'other',
-    format: 'long',
-    color: '#fd7e14',
-    showDelta: true,
-    tableConfig: {
-      notes: 'Migrated cases or non-COVID deaths',
-    },
-    hasPrimary: true,
-  },
-  tested: {
-    displayName: 'tested',
-    color: '#4b1eaa',
-    format: 'short',
-    showDelta: true,
-    hideZero: true,
-    category: 'tested',
-  },
-  vaccinated1: {
-    displayName: 'vaccinated (at least one dose)',
-    color: '#fb5581',
-    format: 'short',
-    showDelta: true,
-    hideZero: true,
-    category: 'vaccinated',
-  },
-  vaccinated2: {
-    displayName: 'fully vaccinated',
-    color: '#fb5581',
-    format: 'short',
-    showDelta: true,
-    hideZero: true,
-    category: 'vaccinated',
-  },
-  vaccinated: {
-    displayName: 'vaccine doses administered',
-    color: '#fb5581',
-    format: 'short',
-    showDelta: true,
-    hideZero: true,
-    category: 'vaccinated',
-  },
-  tpr: {
-    displayName: 'test positivity ratio',
-    format: '%',
-    color: '#fd7e14',
-    nonLinear: true,
-    onlyDelta7: true,
-    hideZero: true,
-    category: 'tested',
-    tableConfig: {
-      notes: 'Calculated over last 7 days',
-    },
-    hasPrimary: true,
-  },
-  cfr: {
-    displayName: 'case fatality ratio',
-    format: '%',
-    color: '#fd7e14',
-    nonLinear: true,
-    hasPrimary: true,
-  },
-  recoveryRatio: {
-    displayName: 'recovery ratio',
-    format: '%',
-    nonLinear: true,
-    tableConfig: {
-      hide: true,
-    },
-    hasPrimary: true,
-  },
-  activeRatio: {
-    displayName: 'active ratio',
-    format: '%',
-    nonLinear: true,
-    tableConfig: {
-      hide: true,
-    },
-    hasPrimary: true,
-  },
-  caseGrowth: {
-    displayName: 'Case Growth',
-    format: '%',
-    nonLinear: true,
-    canBeInfinite: true,
-    tableConfig: {
-      notes:
-        'Percentage growth of cases last week compared to the week a fortnight ago',
-    },
-    hasPrimary: true,
-    mapConfig: {
-      transformFn: (val) => {
-        if (val <= 0) return '≤ 0%';
-        else if (val <= 20) return '0 - 20%';
-        else if (val <= 50) return '20 - 50%';
-        else if (val > 50) return '> 50%';
-      },
-      colorScale: scaleOrdinal(
-        ['≤ 0%', '0 - 20%', '20 - 50%', '> 50%'],
-        ['#1a9850', '#fee08b', '#fc8d59', '#d73027']
-      ),
-    },
-  },
-  population: {
-    displayName: 'population',
-    format: 'short',
-    color: '#b6854d',
-    hideZero: true,
-    mapConfig: {
-      spike: true,
-    },
-  },
+  }
 };
 
 export const PRIMARY_STATISTICS = [
@@ -175,13 +63,6 @@ export const PRIMARY_STATISTICS = [
 export const LEVEL_STATISTICS = [...PRIMARY_STATISTICS];
 
 export const MAP_STATISTICS = [...PRIMARY_STATISTICS];
-
-export const TIMESERIES_STATISTICS = [
-  ...PRIMARY_STATISTICS,
-  'tested',
-  'vaccinated',
-  'tpr',
-];
 
 export const BRUSH_STATISTICS = ['confirmed'];
 
