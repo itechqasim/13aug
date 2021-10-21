@@ -158,18 +158,6 @@ function MapVisualizer({
       return scaleSqrt([0, Math.max(1, statisticMax || 0)], [0, 40])
         .clamp(true)
         .nice(3);
-    } else if (mapViz === MAP_VIZS.SPIKE) {
-      return scaleLinear([0, Math.max(1, statisticMax || 0)], [0, 80])
-        .clamp(true)
-        .nice(3);
-    } else if (STATISTIC_CONFIGS[statistic]?.mapConfig?.colorScale) {
-      return STATISTIC_CONFIGS[statistic].mapConfig.colorScale;
-    } else {
-      // No negative values
-      return scaleSequential(
-        [0, Math.max(1, statisticMax || 0)],
-        colorInterpolator(statistic)
-      ).clamp(true);
     }
   }, [mapViz, statistic, statisticMax]);
 
@@ -229,7 +217,8 @@ function MapVisualizer({
 
           if (!isDistrictView) {
             feature.value = getMapStatistic(stateData);
-          } else {
+          } 
+          else {
             const districtData = stateData?.districts?.[districtName];
 
             if (districtName) feature.value = getMapStatistic(districtData);
@@ -327,7 +316,6 @@ function MapVisualizer({
     const T = transition().duration(D3_TRANSITION_DURATION);
 
     let meshStates = [];
-    let meshDistricts = [];
 
     if (mapMeta.mapType === MAP_TYPES.COUNTRY) {
       meshStates = [mesh(geoData, geoData.objects.states)];
@@ -343,25 +331,6 @@ function MapVisualizer({
       .data(meshStates, (d) => d.id)
       .join(
         (enter) => enter.append('path').attr('d', path).attr('stroke', '#fff0'),
-        (update) => update,
-        (exit) => exit.transition(T).attr('stroke', '#fff0').remove()
-      )
-      .transition(T)
-      .attr('stroke', strokeColor.bind(this, '40'));
-
-    svg
-      .select('.district-borders')
-      .attr('fill', 'none')
-      .attr('stroke-width', 1.5)
-      .selectAll('path')
-      .data(meshDistricts, (d) => d.id)
-      .join(
-        (enter) =>
-          enter
-            .append('path')
-            .attr('d', path)
-            .attr('d', path)
-            .attr('stroke', '#fff0'),
         (update) => update,
         (exit) => exit.transition(T).attr('stroke', '#fff0').remove()
       )
@@ -396,19 +365,6 @@ function MapVisualizer({
           <g className="circles" />
         </svg>
       </div>
-      <svg style={{position: 'absolute', height: 0}}>
-        <defs>
-          <filter id="balance-color" colorInterpolationFilters="sRGB">
-            <feColorMatrix
-              type="matrix"
-              values="0.91372549  0           0            0  0.08627451
-                      0           0.91372549  0            0  0.08627451
-                      0           0           0.854901961  0  0.145098039
-                      0           0           0            1  0"
-            />
-          </filter>
-        </defs>
-      </svg>
     </>
   );
 }

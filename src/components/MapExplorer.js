@@ -3,7 +3,6 @@ import {
   MAP_TYPES,
   MAP_VIEWS,
   MAP_VIZS,
-  MAP_STATISTICS,
   SPRING_CONFIG_NUMBERS,
   STATE_NAMES,
   STATISTIC_CONFIGS,
@@ -38,9 +37,7 @@ function MapExplorer({
   stateCode: mapCode = 'TT',
   data,
   mapView = MAP_VIEWS.DISTRICTS,
-  setMapView,
   mapStatistic,
-  setMapStatistic,
   regionHighlighted,
   setRegionHighlighted,
   noRegionHighlightedDistrictData,
@@ -48,7 +45,7 @@ function MapExplorer({
   setAnchor,
   expandTable = false,
   lastDataDate,
-  hideDistrictData = false,
+  hideDistrictData = true,
   hideDistrictTestData = true,
   hideVaccinated = false,
 }) {
@@ -67,9 +64,7 @@ function MapExplorer({
 
   const isDistrictView =
     mapView === MAP_VIEWS.DISTRICTS &&
-    (mapMeta.mapType === MAP_TYPES.STATE ||
-      (!hideDistrictData &&
-        !(hideDistrictTestData && statisticConfig?.category === 'tested')));
+    (mapMeta.mapType === MAP_TYPES.STATE );
 
   const hoveredRegion = useMemo(() => {
     const hoveredData =
@@ -138,32 +133,6 @@ function MapExplorer({
     config: {tension: 250, ...SPRING_CONFIG_NUMBERS},
   });
 
-  const mapStatistics = useMemo(
-    () =>
-      MAP_STATISTICS.filter(
-        (statistic) =>
-          !(STATISTIC_CONFIGS[statistic]?.category === 'vaccinated') ||
-          !hideVaccinated
-      ),
-    [hideVaccinated]
-  );
-
-  const handleStatisticChange = useCallback(
-    (direction) => {
-      const currentIndex = mapStatistics.indexOf(mapStatistic);
-      const toIndex =
-        (mapStatistics.length + currentIndex + direction) %
-        mapStatistics.length;
-      setMapStatistic(mapStatistics[toIndex]);
-    },
-    [mapStatistic, mapStatistics, setMapStatistic]
-  );
-
-  const swipeHandlers = useSwipeable({
-    onSwipedLeft: handleStatisticChange.bind(this, 1),
-    onSwipedRight: handleStatisticChange.bind(this, -1),
-  });
-
   const mapViz = statisticConfig?.mapConfig?.spike
     ? MAP_VIZS.SPIKE
     : isPerLakh ||
@@ -172,7 +141,7 @@ function MapExplorer({
     ? MAP_VIZS.CHOROPLETH
     : MAP_VIZS.BUBBLE;
 
-  const stickied = anchor === 'mapexplorer' || (expandTable && width >= 769);
+  // const stickied = anchor === 'mapexplorer' || (expandTable && width >= 769);
 
   const transformStatistic = useCallback(
     (val) =>
@@ -227,7 +196,6 @@ function MapExplorer({
         ref={mapExplorerRef}
         className="fadeInUp"
         style={trail[3]}
-        {...swipeHandlers}
       >
         {mapStatistic && (
           <Suspense>
