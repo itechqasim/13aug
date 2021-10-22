@@ -13,15 +13,13 @@ import classnames from 'classnames';
 import {max} from 'd3-array';
 import {json} from 'd3-fetch';
 import {geoIdentity, geoPath} from 'd3-geo';
-import {scaleLinear, scaleSqrt, scaleSequential} from 'd3-scale';
-
+import {scaleSqrt} from 'd3-scale';
 import {select} from 'd3-selection';
 import {transition} from 'd3-transition';
 import {useCallback, useEffect, useMemo, useRef} from 'react';
 import {useHistory} from 'react-router-dom';
 import useSWR from 'swr';
 import {feature, mesh} from 'topojson-client';
-
 
 function MapVisualizer({
   mapCode,
@@ -134,7 +132,7 @@ function MapVisualizer({
         .clamp(true)
         .nice(3);
     }
-  }, [mapViz, statistic, statisticMax]);
+  }, [mapViz, statisticMax]);
 
   const onceTouchedRegion = useRef(null);
 
@@ -168,8 +166,7 @@ function MapVisualizer({
 
           if (!isDistrictView) {
             feature.value = getMapStatistic(stateData);
-          } 
-          else {
+          } else {
             const districtData = stateData?.districts?.[districtName];
 
             if (districtName) feature.value = getMapStatistic(districtData);
@@ -191,7 +188,7 @@ function MapVisualizer({
     const svg = select(svgRef.current);
     const T = transition().duration(D3_TRANSITION_DURATION);
 
-    const regionSelection = svg
+    svg
       .select('.circles')
       .selectAll('circle')
       .data(
@@ -240,7 +237,7 @@ function MapVisualizer({
     getMapStatistic,
   ]);
 
-  // Boundaries of the map 
+  // Boundaries of the map
   useEffect(() => {
     if (!geoData) return;
     const svg = select(svgRef.current);
@@ -265,15 +262,7 @@ function MapVisualizer({
       )
       .transition(T)
       .attr('stroke', strokeColor.bind(this, '40'));
-  }, [
-    geoData,
-    mapMeta,
-    mapCode,
-    mapViz,
-    statistic,
-    path,
-    strokeColor,
-  ]);
+  }, [geoData, mapMeta, mapCode, mapViz, statistic, path, strokeColor]);
 
   return (
     <>

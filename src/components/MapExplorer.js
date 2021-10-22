@@ -8,11 +8,8 @@ import {
   STATISTIC_CONFIGS,
   UNKNOWN_DISTRICT_KEY,
 } from '../constants';
-
 import {formatNumber, getStatistic, retry} from '../utils/commonFunctions';
-import {
-  DotFillIcon
-} from '@primer/octicons-react';
+
 import classnames from 'classnames';
 import equal from 'fast-deep-equal';
 import produce from 'immer';
@@ -28,8 +25,7 @@ import {
 import {useTranslation} from 'react-i18next';
 import {useHistory} from 'react-router-dom';
 import {animated, useSpring} from 'react-spring';
-import {useSwipeable} from 'react-swipeable';
-import {useSessionStorage, useWindowSize} from 'react-use';
+import {useSessionStorage} from 'react-use';
 
 const MapVisualizer = lazy(() => retry(() => import('./MapVisualizer')));
 
@@ -45,10 +41,9 @@ function MapExplorer({
 }) {
   const {t} = useTranslation();
   const mapExplorerRef = useRef();
-  const {width} = useWindowSize();
 
-  const [isPerLakh, setIsPerLakh] = useSessionStorage('isPerLakhMap', false);
-  const [delta7Mode, setDelta7Mode] = useSessionStorage('delta7ModeMap', false);
+  const [isPerLakh] = useSessionStorage('isPerLakhMap', false);
+  const [delta7Mode] = useSessionStorage('delta7ModeMap', false);
 
   const mapMeta = MAP_META[mapCode];
   const mapData =
@@ -57,8 +52,7 @@ function MapExplorer({
   const statisticConfig = STATISTIC_CONFIGS[mapStatistic];
 
   const isDistrictView =
-    mapView === MAP_VIEWS.DISTRICTS &&
-    (mapMeta.mapType === MAP_TYPES.STATE );
+    mapView === MAP_VIEWS.DISTRICTS && mapMeta.mapType === MAP_TYPES.STATE;
 
   const hoveredRegion = useMemo(() => {
     const hoveredData =
@@ -150,11 +144,7 @@ function MapExplorer({
     : '';
 
   return (
-    <div
-      className={classnames(
-        'MapExplorer'
-      )}
-    >
+    <div className={classnames('MapExplorer')}>
       <div className="panel" ref={panelRef}>
         <div className="panel-left fadeInUp" style={trail[0]}>
           <h2
@@ -182,15 +172,9 @@ function MapExplorer({
             </h1>
           )}
         </div>
-
-
       </div>
 
-      <div
-        ref={mapExplorerRef}
-        className="fadeInUp"
-        style={trail[3]}
-      >
+      <div ref={mapExplorerRef} className="fadeInUp" style={trail[3]}>
         {mapStatistic && (
           <Suspense>
             <MapVisualizer

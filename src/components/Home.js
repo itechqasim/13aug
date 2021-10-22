@@ -30,7 +30,7 @@ function Home() {
     districtName: null,
   });
 
-  const [anchor, setAnchor] = useLocalStorage('anchor', null);
+  const [anchor] = useLocalStorage('anchor', null);
   const [mapStatistic, setMapStatistic] = useSessionStorage(
     'mapStatistic',
     'active'
