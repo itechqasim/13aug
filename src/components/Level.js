@@ -5,7 +5,6 @@ import {
 } from '../constants';
 import {capitalize, formatNumber, getStatistic} from '../utils/commonFunctions';
 
-import {HeartFillIcon} from '@primer/octicons-react';
 import classnames from 'classnames';
 import equal from 'fast-deep-equal';
 import {memo, useMemo} from 'react';
@@ -16,7 +15,6 @@ function PureLevelItem({statistic, total, delta}) {
   const {t} = useTranslation();
   const spring = useSpring({
     total: total,
-    delta: delta,
     config: SPRING_CONFIG_NUMBERS,
   });
 
@@ -25,27 +23,6 @@ function PureLevelItem({statistic, total, delta}) {
   return (
     <>
       <h5>{t(capitalize(statisticConfig.displayName))}</h5>
-      <animated.h4>
-        {statistic !== 'active' ? (
-          delta > 0 ? (
-            /* Add space after + because react-spring regex bug */
-            spring.delta.to(
-              (delta) =>
-                `+ ${formatNumber(
-                  delta,
-                  statisticConfig.format !== 'short'
-                    ? statisticConfig.format
-                    : 'long',
-                  statistic
-                )}`
-            )
-          ) : (
-            <HeartFillIcon size={9} verticalAlign={2} />
-          )
-        ) : (
-          '\u00A0'
-        )}
-      </animated.h4>
       <animated.h1>
         {spring.total.to((total) =>
           formatNumber(
@@ -88,7 +65,6 @@ function Level({data}) {
           <LevelItem
             {...{statistic}}
             total={getStatistic(data, 'total', statistic)}
-            delta={getStatistic(data, 'delta', statistic)}
           />
         </animated.div>
       ))}

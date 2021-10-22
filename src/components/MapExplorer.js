@@ -3,17 +3,12 @@ import {
   MAP_TYPES,
   MAP_VIEWS,
   MAP_VIZS,
-  MAP_STATISTICS,
   SPRING_CONFIG_NUMBERS,
   STATE_NAMES,
   STATISTIC_CONFIGS,
-  UNKNOWN_DISTRICT_KEY,
 } from '../constants';
-
 import {formatNumber, getStatistic, retry} from '../utils/commonFunctions';
-import {
-  DotFillIcon
-} from '@primer/octicons-react';
+
 import classnames from 'classnames';
 import equal from 'fast-deep-equal';
 import produce from 'immer';
@@ -29,8 +24,7 @@ import {
 import {useTranslation} from 'react-i18next';
 import {useHistory} from 'react-router-dom';
 import {animated, useSpring} from 'react-spring';
-import {useSwipeable} from 'react-swipeable';
-import {useSessionStorage, useWindowSize} from 'react-use';
+import {useSessionStorage} from 'react-use';
 
 const MapVisualizer = lazy(() => retry(() => import('./MapVisualizer')));
 
@@ -38,27 +32,17 @@ function MapExplorer({
   stateCode: mapCode = 'TT',
   data,
   mapView = MAP_VIEWS.DISTRICTS,
-  setMapView,
   mapStatistic,
-  setMapStatistic,
   regionHighlighted,
   setRegionHighlighted,
   noRegionHighlightedDistrictData,
-  anchor,
-  setAnchor,
-  expandTable = false,
   lastDataDate,
-  hideDistrictData = false,
-  hideDistrictTestData = true,
-  hideVaccinated = false,
-  noDistrictData = false,
 }) {
   const {t} = useTranslation();
   const mapExplorerRef = useRef();
-  const {width} = useWindowSize();
 
-  const [isPerLakh, setIsPerLakh] = useSessionStorage('isPerLakhMap', false);
-  const [delta7Mode, setDelta7Mode] = useSessionStorage('delta7ModeMap', false);
+  const [isPerLakh] = useSessionStorage('isPerLakhMap', false);
+  const [delta7Mode] = useSessionStorage('delta7ModeMap', false);
 
   const mapMeta = MAP_META[mapCode];
   const mapData =
@@ -67,10 +51,7 @@ function MapExplorer({
   const statisticConfig = STATISTIC_CONFIGS[mapStatistic];
 
   const isDistrictView =
-    mapView === MAP_VIEWS.DISTRICTS &&
-    (mapMeta.mapType === MAP_TYPES.STATE ||
-      (!hideDistrictData &&
-        !(hideDistrictTestData && statisticConfig?.category === 'tested')));
+    mapView === MAP_VIEWS.DISTRICTS && mapMeta.mapType === MAP_TYPES.STATE;
 
   const hoveredRegion = useMemo(() => {
     const hoveredData =
@@ -139,32 +120,6 @@ function MapExplorer({
     config: {tension: 250, ...SPRING_CONFIG_NUMBERS},
   });
 
-  const mapStatistics = useMemo(
-    () =>
-      MAP_STATISTICS.filter(
-        (statistic) =>
-          !(STATISTIC_CONFIGS[statistic]?.category === 'vaccinated') ||
-          !hideVaccinated
-      ),
-    [hideVaccinated]
-  );
-
-  const handleStatisticChange = useCallback(
-    (direction) => {
-      const currentIndex = mapStatistics.indexOf(mapStatistic);
-      const toIndex =
-        (mapStatistics.length + currentIndex + direction) %
-        mapStatistics.length;
-      setMapStatistic(mapStatistics[toIndex]);
-    },
-    [mapStatistic, mapStatistics, setMapStatistic]
-  );
-
-  const swipeHandlers = useSwipeable({
-    onSwipedLeft: handleStatisticChange.bind(this, 1),
-    onSwipedRight: handleStatisticChange.bind(this, -1),
-  });
-
   const mapViz = statisticConfig?.mapConfig?.spike
     ? MAP_VIZS.SPIKE
     : isPerLakh ||
@@ -173,7 +128,7 @@ function MapExplorer({
     ? MAP_VIZS.CHOROPLETH
     : MAP_VIZS.BUBBLE;
 
-  const stickied = anchor === 'mapexplorer' || (expandTable && width >= 769);
+  // const stickied = anchor === 'mapexplorer' || (expandTable && width >= 769);
 
   const transformStatistic = useCallback(
     (val) =>
@@ -188,11 +143,7 @@ function MapExplorer({
     : '';
 
   return (
-    <div
-      className={classnames(
-        'MapExplorer'
-      )}
-    >
+    <div className={classnames('MapExplorer')}>
       <div className="panel" ref={panelRef}>
         <div className="panel-left fadeInUp" style={trail[0]}>
           <h2
@@ -200,10 +151,10 @@ function MapExplorer({
             style={{color: zoneColor || statisticConfig?.color}}
           >
             {t(hoveredRegion.name)}
-            {hoveredRegion.name === UNKNOWN_DISTRICT_KEY &&
+            {hoveredRegion.name ===
               ` [${t(STATE_NAMES[regionHighlighted.stateCode])}]`}
           </h2>
-
+          {/* this will give the value to the hovered circle */}
           {regionHighlighted.stateCode && (
             <h1
               className={classnames('district', mapStatistic)}
@@ -220,52 +171,9 @@ function MapExplorer({
             </h1>
           )}
         </div>
-
-        <div className={classnames('panel-right', `is-${mapStatistic}`)}>
-          <div className="switch-type">
-
-            {mapMeta.mapType === MAP_TYPES.STATE && (
-              <>
-                <div className="divider" />
-                <div
-                  className="toggle back fadeInUp"
-                  onClick={() => {
-                    history.push('/#MapExplorer');
-                  }}
-                  style={trail[4]}
-                >
-                </div>
-              </>
-            )}
-          </div>
-
-          <div className="switch-statistic fadeInUp" style={trail[5]}>
-            {mapStatistics.map((statistic) => (
-              <div
-                key={statistic}
-                className={classnames(
-                  'toggle',
-                  'statistic-option',
-                  `is-${statistic}`,
-                  {
-                    'is-highlighted': mapStatistic === statistic,
-                  }
-                )}
-                onClick={setMapStatistic.bind(this, statistic)}
-              >
-                <DotFillIcon />
-              </div>
-            ))}
-          </div>
-        </div>
       </div>
 
-      <div
-        ref={mapExplorerRef}
-        className="fadeInUp"
-        style={trail[3]}
-        {...swipeHandlers}
-      >
+      <div ref={mapExplorerRef} className="fadeInUp" style={trail[3]}>
         {mapStatistic && (
           <Suspense>
             <MapVisualizer
@@ -275,11 +183,9 @@ function MapExplorer({
                 mapCode,
                 isDistrictView,
                 mapViz,
-                regionHighlighted,
                 setRegionHighlighted,
                 getMapStatistic,
                 transformStatistic,
-                noDistrictData,
               }}
             ></MapVisualizer>
           </Suspense>
@@ -300,17 +206,11 @@ const isEqual = (prevProps, currProps) => {
     return false;
   } else if (!equal(prevProps.anchor, currProps.anchor)) {
     return false;
-  } else if (!equal(prevProps.expandTable, currProps.expandTable)) {
-    return false;
   } else if (!equal(prevProps.hideDistrictData, currProps.hideDistrictData)) {
     return false;
   } else if (
     !equal(prevProps.hideDistrictTestData, currProps.hideDistrictTestData)
   ) {
-    return false;
-  } else if (!equal(prevProps.hideVaccinated, currProps.hideVaccinated)) {
-    return false;
-  } else if (!equal(prevProps.lastDataDate, currProps.lastDataDate)) {
     return false;
   } else if (
     !equal(
@@ -327,8 +227,6 @@ const isEqual = (prevProps, currProps) => {
       currProps.noRegionHighlightedDistrictData
     )
   ) {
-    return false;
-  } else if (!equal(prevProps.noDistrictData, currProps.noDistrictData)) {
     return false;
   }
   return true;

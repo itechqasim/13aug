@@ -8,7 +8,7 @@ function StateHeader({data}) {
 
   return (
     <div className="StateHeader">
-      <div className="header-left">
+      <div>
         {data?.meta?.['last_updated'] && (
           <h5>
             {`${t('Last Updated on')} ${formatDate(

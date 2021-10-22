@@ -3,16 +3,9 @@ import {
   ISO_DATE_REGEX,
   LOCALE_SHORTHANDS,
   STATISTIC_CONFIGS,
-  TESTED_EXPIRING_DAYS,
 } from '../constants';
 
-import {
-  differenceInDays,
-  format,
-  formatDistance,
-  formatISO,
-  subDays,
-} from 'date-fns';
+import {format, formatDistance, formatISO, subDays} from 'date-fns';
 import {utcToZonedTime} from 'date-fns-tz';
 import i18n from 'i18next';
 
@@ -135,7 +128,6 @@ export const getStatistic = (
   type,
   statistic,
   {
-    expiredDate = null,
     normalizedByPopulationPer = null,
     movingAverage = false,
     canBeNaN = false,
@@ -143,20 +135,6 @@ export const getStatistic = (
 ) => {
   // TODO: Replace delta with daily to remove ambiguity
   //       Or add another type for daily/delta
-
-  if (expiredDate !== null) {
-    if (STATISTIC_CONFIGS[statistic]?.category === 'tested') {
-      if (
-        !data?.meta?.tested?.date ||
-        differenceInDays(
-          parseIndiaDate(expiredDate),
-          parseIndiaDate(data.meta.tested.date)
-        ) > TESTED_EXPIRING_DAYS
-      ) {
-        return 0;
-      }
-    }
-  }
 
   let multiplyFactor = 1;
   if (type === 'delta' && movingAverage) {
@@ -177,40 +155,12 @@ export const getStatistic = (
     const confirmed = data?.[type]?.confirmed || 0;
     const deceased = data?.[type]?.deceased || 0;
     const recovered = data?.[type]?.recovered || 0;
-    const other = data?.[type]?.other || 0;
-    const active = confirmed - deceased - recovered - other;
+    const active = confirmed - deceased - recovered;
     if (statistic === 'active') {
       val = active;
     } else if (statistic === 'activeRatio') {
       val = 100 * (active / confirmed);
-    }
-  } else if (statistic === 'vaccinated') {
-    const dose1 = data?.[type]?.vaccinated1 || 0;
-    const dose2 = data?.[type]?.vaccinated2 || 0;
-    val = dose1 + dose2;
-  } else if (statistic === 'tpr') {
-    const confirmed = data?.[type]?.confirmed || 0;
-    const tested = data?.[type]?.tested || 0;
-    val = 100 * (confirmed / tested);
-  } else if (statistic === 'cfr') {
-    const deceased = data?.[type]?.deceased || 0;
-    const confirmed = data?.[type]?.confirmed || 0;
-    val = 100 * (deceased / confirmed);
-  } else if (statistic === 'recoveryRatio') {
-    const recovered = data?.[type]?.recovered || 0;
-    const confirmed = data?.[type]?.confirmed || 0;
-    val = 100 * (recovered / confirmed);
-  } else if (statistic === 'caseGrowth') {
-    const confirmedDeltaLastWeek = data?.delta7?.confirmed || 0;
-    const confirmedDeltaTwoWeeksAgo = data?.delta21_14?.confirmed || 0;
-    val =
-      type === 'total'
-        ? 100 *
-          ((confirmedDeltaLastWeek - confirmedDeltaTwoWeeksAgo) /
-            confirmedDeltaTwoWeeksAgo)
-        : 0;
-  } else if (statistic === 'population') {
-    val = type === 'total' ? data?.meta?.population : 0;
+    } // here we are fetching the data and assigning it to statistics variable
   } else {
     val = data?.[type]?.[statistic];
   }
@@ -252,6 +202,3 @@ export function retry(fn, retriesLeft = 5, interval = 1000) {
       });
   });
 }
-
-export const spike = (length, width = 8) =>
-  `M${-width / 2},0L0,${-length}L${width / 2},0`;
