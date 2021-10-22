@@ -1,5 +1,3 @@
-import {scaleOrdinal} from 'd3-scale';
-
 // export const API_DOMAIN = 'http://localhost:8080';
 // export const API_DOMAIN =
 //   'https://raw.githubusercontent.com/shuklaayush/api/test/tmp';
@@ -50,7 +48,7 @@ export const STATISTIC_CONFIGS = {
     format: 'long',
     showDelta: true,
     hasPrimary: true,
-  }
+  },
 };
 
 export const PRIMARY_STATISTICS = [

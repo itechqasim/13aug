@@ -2,7 +2,7 @@ import './App.css';
 
 import {retry} from './utils/commonFunctions';
 
-import {lazy,Suspense} from 'react';
+import {lazy, Suspense} from 'react';
 import {Route, Redirect, Switch, useLocation} from 'react-router-dom';
 const Home = lazy(() => retry(() => import('./components/Home')));
 const App = () => {
@@ -12,8 +12,8 @@ const App = () => {
       pageLink: '/',
       view: Home,
       displayName: 'Home',
-      showInNavbar: true
-    }
+      showInNavbar: true,
+    },
   ];
   return (
     <div className="App">

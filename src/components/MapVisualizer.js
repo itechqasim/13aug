@@ -219,20 +219,6 @@ function MapVisualizer({
         if (onceTouchedRegion.current) return;
         setRegionHighlighted({
           stateCode: STATE_CODES[feature.properties.st_nm],
-          districtName: !isDistrictView
-            ? null
-            : feature.properties.district || UNKNOWN_DISTRICT_KEY,
-        });
-      })
-      .on('pointerdown', (feature) => {
-        if (onceTouchedRegion.current === feature)
-          onceTouchedRegion.current = null;
-        else onceTouchedRegion.current = feature;
-        setRegionHighlighted({
-          stateCode: STATE_CODES[feature.properties.st_nm],
-          districtName: !isDistrictView
-            ? null
-            : feature.properties.district || UNKNOWN_DISTRICT_KEY,
         });
       })
       .call((sel) => {
@@ -245,7 +231,6 @@ function MapVisualizer({
   }, [
     mapMeta.mapType,
     mapViz,
-    isDistrictView,
     sortedFeatures,
     history,
     mapScale,
@@ -267,8 +252,6 @@ function MapVisualizer({
       meshStates = [mesh(geoData, geoData.objects.states)];
       meshStates[0].id = `${mapCode}-states`;
     }
-
-
     svg
       .select('.state-borders')
       .attr('fill', 'none')

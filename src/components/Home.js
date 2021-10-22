@@ -2,11 +2,8 @@
 import {
   API_REFRESH_INTERVAL,
   DATA_API_ROOT,
-  DISTRICT_START_DATE,
-  DISTRICT_TEST_END_DATE,
   MAP_VIEWS,
   PRIMARY_STATISTICS,
-  TESTED_EXPIRING_DAYS,
   UNKNOWN_DISTRICT_KEY,
 } from '../constants';
 import useStickySWR from '../hooks/useStickySWR';
@@ -18,10 +15,9 @@ import {
 } from '../utils/commonFunctions';
 
 import classnames from 'classnames';
-import {addDays, formatISO, max} from 'date-fns';
+import {formatISO, max} from 'date-fns';
 import {useMemo, useRef, useState, lazy, Suspense} from 'react';
-import {useLocation} from 'react-router-dom';
-import {useLocalStorage, useSessionStorage, useWindowSize} from 'react-use';
+import {useLocalStorage, useSessionStorage} from 'react-use';
 
 const Level = lazy(() => retry(() => import('./Level')));
 const MapExplorer = lazy(() => retry(() => import('./MapExplorer')));
@@ -39,7 +35,7 @@ function Home() {
     'mapStatistic',
     'active'
   );
-  const [mapView, setMapView] = useLocalStorage('mapView', MAP_VIEWS.STATES);
+  const [mapView] = useLocalStorage('mapView', MAP_VIEWS.STATES);
 
   const [date] = useState('');
 
@@ -54,13 +50,6 @@ function Home() {
 
   const homeRightElement = useRef();
 
-  const hideDistrictTestData =
-    date === '' ||
-    date >
-      formatISO(
-        addDays(parseIndiaDate(DISTRICT_TEST_END_DATE), TESTED_EXPIRING_DAYS),
-        {representation: 'date'}
-      );
   const lastDataDate = useMemo(() => {
     const updatedDates = [
       data?.['TT']?.meta?.date,
@@ -113,40 +102,38 @@ function Home() {
           <div style={{position: 'relative', marginTop: '1rem'}}>
             {data && (
               <Suspense fallback={<div style={{height: '50rem'}} />}>
-                  <MapSwitcher {...{mapStatistic, setMapStatistic}} />
+                <MapSwitcher {...{mapStatistic, setMapStatistic}} />
                 <Level data={data['TT']} />
               </Suspense>
             )}
           </div>
 
-
-            <>
-              {data && (
-                <div
-                  className={classnames('map-container', {
-                    stickied:
-                      anchor === 'mapexplorer' ,
-                  })}
-                >
-                  <Suspense fallback={<div style={{height: '50rem'}} />}>
-                    <StateHeader data={data['TT']} />
-                    <MapExplorer
-                      {...{
-                        stateCode: 'TT',
-                        data,
-                        mapStatistic,
-                        mapView,
-                        regionHighlighted,
-                        setRegionHighlighted,
-                        lastDataDate,
-                        noRegionHighlightedDistrictData,
-                      }}
-                    />
-                  </Suspense>
-                </div>
-              )}
-            </>
-        </div>      
+          <>
+            {data && (
+              <div
+                className={classnames('map-container', {
+                  stickied: anchor === 'mapexplorer',
+                })}
+              >
+                <Suspense fallback={<div style={{height: '50rem'}} />}>
+                  <StateHeader data={data['TT']} />
+                  <MapExplorer
+                    {...{
+                      stateCode: 'TT',
+                      data,
+                      mapStatistic,
+                      mapView,
+                      regionHighlighted,
+                      setRegionHighlighted,
+                      lastDataDate,
+                      noRegionHighlightedDistrictData,
+                    }}
+                  />
+                </Suspense>
+              </div>
+            )}
+          </>
+        </div>
       </div>
     </>
   );

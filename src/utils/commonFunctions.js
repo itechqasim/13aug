@@ -5,12 +5,7 @@ import {
   STATISTIC_CONFIGS,
 } from '../constants';
 
-import {
-  format,
-  formatDistance,
-  formatISO,
-  subDays,
-} from 'date-fns';
+import {format, formatDistance, formatISO, subDays} from 'date-fns';
 import {utcToZonedTime} from 'date-fns-tz';
 import i18n from 'i18next';
 
@@ -160,13 +155,13 @@ export const getStatistic = (
     const confirmed = data?.[type]?.confirmed || 0;
     const deceased = data?.[type]?.deceased || 0;
     const recovered = data?.[type]?.recovered || 0;
-    const active = confirmed - deceased - recovered ;
+    const active = confirmed - deceased - recovered;
     if (statistic === 'active') {
       val = active;
     } else if (statistic === 'activeRatio') {
       val = 100 * (active / confirmed);
-    }//here we are fetching the data and assigning it to statistics variable
-  }  else {
+    } // here we are fetching the data and assigning it to statistics variable
+  } else {
     val = data?.[type]?.[statistic];
   }
 
