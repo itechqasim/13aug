@@ -68,8 +68,6 @@ export const UPDATES_COUNT = 5;
 
 export const DISTRICT_TABLE_COUNT = 40;
 
-export const D3_TRANSITION_DURATION = 300;
-
 export const TESTED_EXPIRING_DAYS = 7;
 
 export const UNASSIGNED_STATE_CODE = 'UN';

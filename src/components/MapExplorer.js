@@ -6,7 +6,6 @@ import {
   SPRING_CONFIG_NUMBERS,
   STATE_NAMES,
   STATISTIC_CONFIGS,
-  UNKNOWN_DISTRICT_KEY,
 } from '../constants';
 import {formatNumber, getStatistic, retry} from '../utils/commonFunctions';
 
@@ -152,10 +151,10 @@ function MapExplorer({
             style={{color: zoneColor || statisticConfig?.color}}
           >
             {t(hoveredRegion.name)}
-            {hoveredRegion.name === UNKNOWN_DISTRICT_KEY &&
+            {hoveredRegion.name ===
               ` [${t(STATE_NAMES[regionHighlighted.stateCode])}]`}
           </h2>
-
+          {/* this will give the value to the hovered circle */}
           {regionHighlighted.stateCode && (
             <h1
               className={classnames('district', mapStatistic)}
@@ -207,17 +206,11 @@ const isEqual = (prevProps, currProps) => {
     return false;
   } else if (!equal(prevProps.anchor, currProps.anchor)) {
     return false;
-  } else if (!equal(prevProps.expandTable, currProps.expandTable)) {
-    return false;
   } else if (!equal(prevProps.hideDistrictData, currProps.hideDistrictData)) {
     return false;
   } else if (
     !equal(prevProps.hideDistrictTestData, currProps.hideDistrictTestData)
   ) {
-    return false;
-  } else if (!equal(prevProps.hideVaccinated, currProps.hideVaccinated)) {
-    return false;
-  } else if (!equal(prevProps.lastDataDate, currProps.lastDataDate)) {
     return false;
   } else if (
     !equal(

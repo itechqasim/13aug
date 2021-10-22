@@ -1,5 +1,4 @@
 import {
-  D3_TRANSITION_DURATION,
   MAP_DIMENSIONS,
   MAP_META,
   MAP_TYPES,
@@ -15,7 +14,6 @@ import {json} from 'd3-fetch';
 import {geoIdentity, geoPath} from 'd3-geo';
 import {scaleSqrt} from 'd3-scale';
 import {select} from 'd3-selection';
-import {transition} from 'd3-transition';
 import {useCallback, useEffect, useMemo, useRef} from 'react';
 import {useHistory} from 'react-router-dom';
 import useSWR from 'swr';
@@ -186,7 +184,6 @@ function MapVisualizer({
   // Bubbles denoting the no of cases/etc
   useEffect(() => {
     const svg = select(svgRef.current);
-    const T = transition().duration(D3_TRANSITION_DURATION);
 
     svg
       .select('.circles')
@@ -209,8 +206,7 @@ function MapVisualizer({
             .call((enter) => {
               enter.append('title');
             }),
-        (update) => update,
-        (exit) => exit.call((exit) => exit.transition(T).attr('r', 0).remove())
+        (update) => update
       )
       .on('mouseenter', (event, feature) => {
         if (onceTouchedRegion.current) return;
@@ -220,7 +216,6 @@ function MapVisualizer({
       })
       .call((sel) => {
         sel
-          .transition(T)
           .attr('fill', statisticConfig.color + '70')
           .attr('stroke', statisticConfig.color + '70')
           .attr('r', (feature) => mapScale(feature.value));
@@ -241,7 +236,6 @@ function MapVisualizer({
   useEffect(() => {
     if (!geoData) return;
     const svg = select(svgRef.current);
-    const T = transition().duration(D3_TRANSITION_DURATION);
 
     let meshStates = [];
 
@@ -257,10 +251,8 @@ function MapVisualizer({
       .data(meshStates, (d) => d.id)
       .join(
         (enter) => enter.append('path').attr('d', path).attr('stroke', '#fff0'),
-        (update) => update,
-        (exit) => exit.transition(T).attr('stroke', '#fff0').remove()
+        (update) => update
       )
-      .transition(T)
       .attr('stroke', strokeColor.bind(this, '40'));
   }, [geoData, mapMeta, mapCode, mapViz, statistic, path, strokeColor]);
 
